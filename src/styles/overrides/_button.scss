@@ -1,0 +1,21 @@
+$btn-height: 32px;
+$btn-padding-inline: 12px;
+$btn-border-radius: 10px;
+
+// Global VBtn overrides
+.v-btn {
+  border-radius: $btn-border-radius;
+  text-transform: none;
+  letter-spacing: normal;
+
+  &:not(.v-btn--icon):not(.v-btn--stacked) {
+    --v-btn-height: #{$btn-height};
+    min-height: $btn-height;
+    height: $btn-height;
+    padding: 0 $btn-padding-inline;
+  }
+
+  &.v-btn--variant-outlined:not(.text-primary):not(.text-secondary):not(.text-error):not(.text-success):not(.text-warning):not(.text-info) {
+    border-color: color-mix(in srgb, currentColor 10%, transparent);
+  }
+}

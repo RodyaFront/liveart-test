@@ -1,0 +1,24 @@
+// Vuetify SASS variables — global overrides before components compile.
+// Docs: https://vuetifyjs.com/en/features/sass-variables/
+
+@use 'vuetify/settings' with (
+  // Typography
+  $body-font-family: (
+    'Roboto',
+    sans-serif,
+  ),
+  $font-size-root: 16px,
+  $typography: (
+    'button': (
+      'letter-spacing': normal,
+      'text-transform': none,
+    ),
+  ),
+
+  // Shape
+  $border-radius-root: 8px,
+  $card-border-radius: 12px,
+
+  // Density / sizing
+  $input-control-height: 48px
+);

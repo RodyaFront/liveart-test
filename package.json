@@ -1,0 +1,37 @@
+{
+  "name": "liveart-test",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "cropperjs": "^1.6.2",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.13",
+    "vue-router": "^4.6.4",
+    "vuetify": "^3.8.0"
+  },
+  "devDependencies": {
+    "@types/cropperjs": "^1.1.5",
+    "@types/node": "^22.13.10",
+    "@types/pngjs": "^6.0.5",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vitest/coverage-v8": "^4.1.9",
+    "@vue/tsconfig": "^0.9.1",
+    "happy-dom": "^20.10.6",
+    "pngjs": "^7.0.0",
+    "sass": "^1.99.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.2",
+    "vite-plugin-vuetify": "^2.1.0",
+    "vitest": "^4.1.9",
+    "vue-tsc": "^2.2.8"
+  }
+}

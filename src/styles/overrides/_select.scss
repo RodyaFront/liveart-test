@@ -1,0 +1,23 @@
+$select-control-height: 32px;
+$select-padding-inline: 12px;
+
+// Compact outlined v-select — aligned with button control sizing (_button.scss)
+.v-input.v-select.v-input--density-compact {
+  .v-field.v-field--variant-outlined {
+    --v-input-control-height: #{$select-control-height};
+    --v-field-padding-start: #{$select-padding-inline};
+    --v-field-padding-top: 0px;
+    --v-field-padding-bottom: 0px;
+  }
+
+  .v-field__input {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .v-field__append-inner,
+  .v-field__prepend-inner {
+    align-items: center;
+    padding-top: 0;
+  }
+}

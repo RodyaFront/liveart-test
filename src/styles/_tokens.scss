@@ -1,0 +1,21 @@
+// Design tokens for custom editor UI (preview, crop overlay, etc.)
+// Use these in component scoped styles: var(--editor-preview-bg)
+
+:root {
+  --editor-preview-bg: rgb(var(--v-theme-surface-variant), 0.3);
+  --editor-crop-border: #ffffff;
+  --editor-crop-handle: #ffffff;
+  --editor-crop-dim: rgb(0 0 0 / 0.55);
+  --editor-panel-gap: 0.5rem;
+  --editor-bg: color-mix(in srgb, #000000 10%, transparent);
+  --editor-panel-bg: rgb(var(--v-theme-surface-bright));
+  --editor-preview-radius: 0.75rem;
+  --editor-preview-padding: 1rem;
+  --editor-preview-chip-inset: 0.5rem;
+  --editor-preview-chip-corner-radius: max(
+    0px,
+    calc(var(--editor-preview-radius) - var(--editor-preview-chip-inset))
+  );
+  --editor-preview-chip-bg: rgb(var(--v-theme-surface-bright));
+  --editor-preview-chip-fg: rgb(var(--v-theme-on-surface));
+}

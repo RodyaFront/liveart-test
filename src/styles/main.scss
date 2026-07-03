@@ -1,0 +1,8 @@
+// Vuetify styles entry — import once in src/plugins/vuetify.ts
+@use './settings';
+@use 'vuetify';
+@use './tokens';
+@use './overrides/button';
+@use './overrides/select';
+@use './overrides/menu';
+@use './overrides/cropper';

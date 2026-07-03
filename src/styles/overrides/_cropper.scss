@@ -1,0 +1,26 @@
+.editor-preview {
+  .cropper-view-box {
+    outline: 1px solid var(--editor-crop-border);
+    outline-color: var(--editor-crop-border);
+  }
+
+  .cropper-line {
+    background-color: var(--editor-crop-border);
+  }
+
+  .cropper-point {
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color: var(--editor-crop-handle);
+    border: 2px solid #ffffff;
+    opacity: 1;
+  }
+
+  .cropper-modal {
+    background-color: var(--editor-crop-dim);
+  }
+
+  .cropper-face {
+    background-color: transparent;
+  }
+}
