@@ -78,9 +78,11 @@ Original (Blob)
 | Слой | Ответственность | Где |
 |---|---|---|
 | **Types** | Контракты операций, `EditDocument` | `src/types/editor.ts` |
-| **Store (Pinia)** | Оригинал, операции, derived state, orchestration | `src/stores/editor.ts` |
+| **Store (Pinia)** | Orchestration facade: state, async actions, wiring | `src/stores/editor.ts` |
+| **Editor helpers** | Crop session, dimensions display | `src/lib/editor/*` |
+| **Async guards** | Stale async operation protection | `src/lib/async/createAsyncGuard.ts` |
 | **Composables** | Cropper lifecycle, file upload | `useCropper`, `useImageUpload` |
-| **Render pipeline** | Pure functions: `operations + original → Blob` | `src/lib/image/*` |
+| **Render pipeline** | Pure functions: `operations + original → Blob`, preview URL cache | `src/lib/image/*` |
 | **Components** | UI, события, привязка к store | `src/components/main/*` |
 
 ### 2.3. Типобезопасная модель операций
@@ -165,6 +167,11 @@ src/
 │   ├── useCropper.ts
 │   ├── useImageUpload.ts
 │   └── useJsonImport.ts
+├── lib/async/
+│   └── createAsyncGuard.ts
+├── lib/editor/
+│   ├── cropSession.ts
+│   └── editorDimensions.ts
 ├── lib/image/
 │   ├── adjustments.ts
 │   ├── cropImageBlob.ts
@@ -175,6 +182,7 @@ src/
 │   ├── exportImage.ts
 │   ├── filters.ts
 │   ├── operations.ts          # find/upsert crop, buildPreviewCssFilter
+│   ├── previewCache.ts        # crop preview URL revoke/replace
 │   ├── preloadObjectUrl.ts
 │   ├── readImageMeta.ts       # EXIF-aware via createImageBitmap
 │   ├── rebuildCropPreview.ts  # syncCropPreviewFromOperations

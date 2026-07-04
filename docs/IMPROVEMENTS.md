@@ -37,7 +37,7 @@
 | **Проблема** | Store совмещает domain (operations upsert), infrastructure (URL lifecycle), UI session (crop editing), async guards (`loadSeq`, `cropSeq`, …), error messages. |
 | **Нарушает** | SRP |
 | **Решение (P3, опционально)** | Вынести: `rebuildCropPreview` + revoke → `lib/image/previewCache.ts`; crop session → composable `useCropSession` или отдельный модуль; seq guards → `createAsyncGuard()`. Store остаётся фасадом. |
-| **Статус** | [ ] |
+| **Статус** | [x] |
 
 ### 1.4. Module-level seq counters
 
@@ -46,7 +46,7 @@
 | **Где** | `src/stores/editor.ts` — `let loadSeq`, `cropSeq`, `exportSeq`, `importSeq` вне store |
 | **Проблема** | Скрытая связь с `reset()`; сложнее изолированно тестировать store. |
 | **Решение** | Перенести в closure/composable или private fields factory; документировать контракт invalidate. |
-| **Статус** | [ ] |
+| **Статус** | [x] |
 
 ### 1.5. Дублирование canvas pipeline (minor)
 

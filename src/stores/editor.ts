@@ -1,5 +1,11 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+import { createAsyncGuard } from '@/lib/async/createAsyncGuard'
+import { createCropSessionStart, hasPendingCrop as computeHasPendingCrop } from '@/lib/editor/cropSession'
+import {
+  buildImageDimensionsLabel,
+  buildImageDimensionsTooltip,
+} from '@/lib/editor/editorDimensions'
 import { isDefaultAdjustments, mergeAdjustments } from '@/lib/image/adjustments'
 import {
   assertDocumentMatchesSource,
@@ -15,7 +21,6 @@ import { downloadBlob } from '@/lib/image/downloadFile'
 import { exportImageBlob, getExportImageFilename } from '@/lib/image/exportImage'
 import {
   buildPreviewCssFilter,
-  cropOperationToRect,
   findAdjustOperationIndex,
   findCropOperation,
   findFilterOperationIndex,
@@ -23,8 +28,11 @@ import {
   removeCropOperation,
   upsertCropOperation,
 } from '@/lib/image/operations'
+import {
+  applyCropPreviewState as mergeCropPreviewState,
+  revokeObjectUrl,
+} from '@/lib/image/previewCache'
 import { type CropPreviewState, syncCropPreviewFromOperations } from '@/lib/image/rebuildCropPreview'
-import { cropRectsEqual } from '@/lib/image/cropRect'
 import { readImageMeta } from '@/lib/image/readImageMeta'
 import { READ_IMAGE_ERROR, validateImageFile } from '@/lib/image/validateImageFile'
 import {
@@ -52,43 +60,18 @@ interface EditorState {
   isImportingDocument: boolean
 }
 
-let loadSeq = 0
-let cropSeq = 0
-let exportSeq = 0
-let importSeq = 0
+const loadGuard = createAsyncGuard()
+const cropGuard = createAsyncGuard()
+const exportGuard = createAsyncGuard()
+const importGuard = createAsyncGuard()
 
-function formatImageDimensions(width: number, height: number): string {
-  return `${Math.round(width)} × ${Math.round(height)} px`
-}
-
-function resolveDisplayedDimensions(state: EditorState): { width: number; height: number } | null {
-  if (!state.originalBlob) {
-    return null
+function dimensionsInput(state: EditorState) {
+  return {
+    originalBlob: state.originalBlob,
+    originalMeta: state.originalMeta,
+    cropDraft: state.cropDraft,
+    operations: state.operations,
   }
-
-  if (state.cropDraft) {
-    return {
-      width: state.cropDraft.width,
-      height: state.cropDraft.height,
-    }
-  }
-
-  const cropOperation = findCropOperation(state.operations)
-  if (cropOperation) {
-    return {
-      width: cropOperation.width,
-      height: cropOperation.height,
-    }
-  }
-
-  if (state.originalMeta) {
-    return {
-      width: state.originalMeta.width,
-      height: state.originalMeta.height,
-    }
-  }
-
-  return null
 }
 
 export const useEditorStore = defineStore('editor', {
@@ -135,48 +118,15 @@ export const useEditorStore = defineStore('editor', {
       && state.previewObjectUrl !== null
       && !state.isViewingOriginal,
 
-    imageDimensionsLabel: (state) => {
-      const dimensions = resolveDisplayedDimensions(state)
-      if (!dimensions) {
-        return null
-      }
+    imageDimensionsLabel: (state) => buildImageDimensionsLabel(dimensionsInput(state)),
 
-      return formatImageDimensions(dimensions.width, dimensions.height)
-    },
+    imageDimensionsTooltip: (state) => buildImageDimensionsTooltip(dimensionsInput(state)),
 
-    imageDimensionsTooltip(state): string | null {
-      if (!state.originalMeta) {
-        return null
-      }
-
-      const displayed = resolveDisplayedDimensions(state)
-      if (!displayed) {
-        return null
-      }
-
-      const original = formatImageDimensions(state.originalMeta.width, state.originalMeta.height)
-      const current = formatImageDimensions(displayed.width, displayed.height)
-      const hasCropOutput = displayed.width !== state.originalMeta.width
-        || displayed.height !== state.originalMeta.height
-
-      if (hasCropOutput) {
-        return `Cropped output: ${current}. Original: ${original}.`
-      }
-
-      return `Original image dimensions: ${original}`
-    },
-
-    hasPendingCrop: (state) => {
-      if (!state.cropDraft || !state.isCropEditing) {
-        return false
-      }
-
-      if (!state.appliedCrop) {
-        return true
-      }
-
-      return !cropRectsEqual(state.cropDraft, state.appliedCrop)
-    },
+    hasPendingCrop: (state) => computeHasPendingCrop(
+      state.cropDraft,
+      state.appliedCrop,
+      state.isCropEditing,
+    ),
 
     isCropApplied: (state) => !state.isCropEditing && findCropOperation(state.operations) !== null,
 
@@ -235,24 +185,21 @@ export const useEditorStore = defineStore('editor', {
 
   actions: {
     applyCropPreviewState(cropState: CropPreviewState) {
-      if (this.croppedPreviewUrl) {
-        URL.revokeObjectURL(this.croppedPreviewUrl)
-      }
-
-      this.croppedPreviewUrl = cropState.croppedPreviewUrl
-      this.appliedCrop = cropState.appliedCrop
-      this.cropDraft = cropState.cropDraft
+      const next = mergeCropPreviewState(this.croppedPreviewUrl, cropState)
+      this.croppedPreviewUrl = next.croppedPreviewUrl
+      this.appliedCrop = next.appliedCrop
+      this.cropDraft = next.cropDraft
     },
 
     async loadImage(file: File) {
-      const seq = ++loadSeq
+      const seq = loadGuard.next()
       this.clearError()
       this.isLoading = true
 
       try {
         const validation = validateImageFile(file)
         if (!validation.ok) {
-          if (seq === loadSeq) {
+          if (loadGuard.isCurrent(seq)) {
             this.error = validation.message
           }
           return
@@ -260,13 +207,11 @@ export const useEditorStore = defineStore('editor', {
 
         const meta = await readImageMeta(file)
 
-        if (seq !== loadSeq) {
+        if (!loadGuard.isCurrent(seq)) {
           return
         }
 
-        if (this.previewObjectUrl) {
-          URL.revokeObjectURL(this.previewObjectUrl)
-        }
+        revokeObjectUrl(this.previewObjectUrl)
 
         this.clearCrop()
         this.operations = []
@@ -277,12 +222,12 @@ export const useEditorStore = defineStore('editor', {
         this.isCropEditing = false
       }
       catch {
-        if (seq === loadSeq) {
+        if (loadGuard.isCurrent(seq)) {
           this.error = READ_IMAGE_ERROR
         }
       }
       finally {
-        if (seq === loadSeq) {
+        if (loadGuard.isCurrent(seq)) {
           this.isLoading = false
         }
       }
@@ -297,13 +242,12 @@ export const useEditorStore = defineStore('editor', {
         return
       }
 
-      const existingCrop = findCropOperation(this.operations)
-      const cropRect = existingCrop ? cropOperationToRect(existingCrop) : null
+      const session = createCropSessionStart(this.operations)
 
       this.isCropEditing = true
       this.isViewingOriginal = false
-      this.appliedCrop = cropRect
-      this.cropDraft = cropRect ? { ...cropRect } : null
+      this.appliedCrop = session.appliedCrop
+      this.cropDraft = session.cropDraft
     },
 
     async applyCrop() {
@@ -311,7 +255,7 @@ export const useEditorStore = defineStore('editor', {
         return
       }
 
-      const seq = ++cropSeq
+      const seq = cropGuard.next()
       const cropDraft = { ...this.cropDraft }
 
       this.isApplyingCrop = true
@@ -321,7 +265,7 @@ export const useEditorStore = defineStore('editor', {
 
         const cropState = await syncCropPreviewFromOperations(this.originalBlob, this.operations)
 
-        if (seq !== cropSeq) {
+        if (!cropGuard.isCurrent(seq)) {
           return
         }
 
@@ -331,13 +275,13 @@ export const useEditorStore = defineStore('editor', {
         await nextTick()
       }
       catch (error) {
-        if (seq === cropSeq) {
+        if (cropGuard.isCurrent(seq)) {
           console.error(error)
           this.error = 'Failed to apply crop'
         }
       }
       finally {
-        if (seq === cropSeq) {
+        if (cropGuard.isCurrent(seq)) {
           this.isApplyingCrop = false
         }
       }
@@ -348,7 +292,7 @@ export const useEditorStore = defineStore('editor', {
         return
       }
 
-      const seq = ++cropSeq
+      const seq = cropGuard.next()
       this.isApplyingCrop = true
 
       try {
@@ -356,7 +300,7 @@ export const useEditorStore = defineStore('editor', {
 
         const cropState = await syncCropPreviewFromOperations(this.originalBlob, this.operations)
 
-        if (seq !== cropSeq) {
+        if (!cropGuard.isCurrent(seq)) {
           return
         }
 
@@ -364,22 +308,20 @@ export const useEditorStore = defineStore('editor', {
         this.isCropEditing = false
       }
       catch (error) {
-        if (seq === cropSeq) {
+        if (cropGuard.isCurrent(seq)) {
           console.error(error)
           this.error = 'Failed to undo crop'
         }
       }
       finally {
-        if (seq === cropSeq) {
+        if (cropGuard.isCurrent(seq)) {
           this.isApplyingCrop = false
         }
       }
     },
 
     clearCrop() {
-      if (this.croppedPreviewUrl) {
-        URL.revokeObjectURL(this.croppedPreviewUrl)
-      }
+      revokeObjectUrl(this.croppedPreviewUrl)
 
       this.croppedPreviewUrl = null
       this.isCropEditing = false
@@ -465,14 +407,14 @@ export const useEditorStore = defineStore('editor', {
         return
       }
 
-      const seq = ++exportSeq
+      const seq = exportGuard.next()
       this.clearError()
       this.isExportingImage = true
 
       try {
         const blob = await exportImageBlob(this.originalBlob, this.operations)
 
-        if (seq !== exportSeq) {
+        if (!exportGuard.isCurrent(seq)) {
           return
         }
 
@@ -480,13 +422,13 @@ export const useEditorStore = defineStore('editor', {
         downloadBlob(blob, filename)
       }
       catch (error) {
-        if (seq === exportSeq) {
+        if (exportGuard.isCurrent(seq)) {
           console.error(error)
           this.error = 'Failed to export image'
         }
       }
       finally {
-        if (seq === exportSeq) {
+        if (exportGuard.isCurrent(seq)) {
           this.isExportingImage = false
         }
       }
@@ -507,7 +449,7 @@ export const useEditorStore = defineStore('editor', {
         return
       }
 
-      const seq = ++importSeq
+      const seq = importGuard.next()
       this.clearError()
       this.isImportingDocument = true
 
@@ -518,7 +460,7 @@ export const useEditorStore = defineStore('editor', {
 
         const cropState = await syncCropPreviewFromOperations(this.originalBlob, document.operations)
 
-        if (seq !== importSeq) {
+        if (!importGuard.isCurrent(seq)) {
           return
         }
 
@@ -528,7 +470,7 @@ export const useEditorStore = defineStore('editor', {
         this.isViewingOriginal = false
       }
       catch (error) {
-        if (seq !== importSeq) {
+        if (!importGuard.isCurrent(seq)) {
           return
         }
 
@@ -545,21 +487,19 @@ export const useEditorStore = defineStore('editor', {
         }
       }
       finally {
-        if (seq === importSeq) {
+        if (importGuard.isCurrent(seq)) {
           this.isImportingDocument = false
         }
       }
     },
 
     reset() {
-      loadSeq += 1
-      cropSeq += 1
-      exportSeq += 1
-      importSeq += 1
+      loadGuard.invalidate()
+      cropGuard.invalidate()
+      exportGuard.invalidate()
+      importGuard.invalidate()
 
-      if (this.previewObjectUrl) {
-        URL.revokeObjectURL(this.previewObjectUrl)
-      }
+      revokeObjectUrl(this.previewObjectUrl)
 
       this.originalBlob = null
       this.originalMeta = null
