@@ -54,18 +54,29 @@ const {
       </v-chip>
     </div>
 
-    <v-btn
+    <div
       v-if="isCropEditing"
-      block
-      variant="flat"
-      class="editor-crop-panel__apply-btn"
-      prepend-icon="mdi-crop"
-      :disabled="!canApplyCrop"
-      :loading="store.isApplyingCrop"
-      @click="store.applyCrop()"
+      class="editor-crop-panel__editing-actions"
     >
-      Apply crop
-    </v-btn>
+      <v-btn
+        class="editor-crop-panel__apply-btn editor-crop-panel__action-btn"
+        variant="flat"
+        prepend-icon="mdi-crop"
+        :disabled="!canApplyCrop"
+        :loading="store.isApplyingCrop"
+        @click="store.applyCrop()"
+      >
+        Apply crop
+      </v-btn>
+      <v-btn
+        class="editor-crop-panel__action-btn"
+        variant="outlined"
+        :disabled="store.isApplyingCrop"
+        @click="store.cancelCropEditing()"
+      >
+        Cancel
+      </v-btn>
+    </div>
 
     <div
       v-else
@@ -141,6 +152,7 @@ const {
   }
 }
 
+.editor-crop-panel__editing-actions,
 .editor-crop-panel__actions {
   display: grid;
   grid-template-columns: 2fr 1fr;

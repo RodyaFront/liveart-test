@@ -29,3 +29,11 @@ export function hasPendingCrop(
 
   return !cropRectsEqual(cropDraft, appliedCrop)
 }
+
+export function cancelCropSession(
+  appliedCrop: CropRect | null,
+): { cropDraft: CropRect | null } {
+  return {
+    cropDraft: appliedCrop ? { ...appliedCrop } : null,
+  }
+}

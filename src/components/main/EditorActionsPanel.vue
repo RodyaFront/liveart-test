@@ -114,18 +114,31 @@ function uploadNewImage() {
       </v-btn>
     </div>
 
-    <v-btn
-      block
-      class="editor-actions-panel__export-btn"
-      color="primary"
-      prepend-icon="mdi-download"
-      :disabled="!canExport"
-      :loading="isExportingImage"
-      :title="exportDisabledReason"
-      @click="store.exportImage()"
+    <v-tooltip
+      :disabled="!exportDisabledReason"
+      location="top"
+      content-class="editor-actions-panel__export-tooltip"
+      :text="exportDisabledReason"
     >
-      Export image
-    </v-btn>
+      <template #activator="{ props: tooltipProps }">
+        <span
+          v-bind="tooltipProps"
+          class="editor-actions-panel__export-wrap"
+        >
+          <v-btn
+            block
+            class="editor-actions-panel__export-btn"
+            color="primary"
+            prepend-icon="mdi-download"
+            :disabled="!canExport"
+            :loading="isExportingImage"
+            @click="store.exportImage()"
+          >
+            Export image
+          </v-btn>
+        </span>
+      </template>
+    </v-tooltip>
   </section>
 </template>
 
@@ -170,11 +183,29 @@ $action-btn-size: 5.375rem; // 86px
   }
 }
 
+.editor-actions-panel__export-wrap {
+  display: block;
+  width: 100%;
+}
+
 .editor-actions-panel__export-btn {
   margin-top: .25rem;
 }
 
 .editor-actions-panel__hidden-input {
   display: none;
+}
+</style>
+
+<style lang="scss">
+/* Teleported tooltip — outside scoped tree */
+.editor-actions-panel__export-tooltip {
+  background-color: rgb(26, 26, 26) !important;
+  color: #fff !important;
+  font-size: 0.75rem;
+  line-height: 1.33;
+  padding: 0.375rem 0.625rem !important;
+  border-radius: 0.375rem;
+  box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 0.35);
 }
 </style>
