@@ -119,7 +119,7 @@ interface EditDocument {
 
 - `URL.revokeObjectURL` при смене файла, undo crop, `reset()`
 - CropperJS `destroy()` при выходе из crop mode / смене URL
-- Один `originalBlob`; `croppedPreviewUrl` / `cropApplyHistory` — derived cache для preview (не stack операций)
+- Один `originalBlob`; `croppedPreviewUrl` — derived cache для preview (не stack операций)
 
 ### 2.6. Обработка ошибок
 

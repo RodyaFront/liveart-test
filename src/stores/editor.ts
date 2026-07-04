@@ -29,7 +29,6 @@ import { readImageMeta } from '@/lib/image/readImageMeta'
 import { READ_IMAGE_ERROR, validateImageFile } from '@/lib/image/validateImageFile'
 import {
   type Adjustments,
-  type CropHistoryEntry,
   type CropRect,
   type EditOperation,
   type FilterValue,
@@ -41,7 +40,6 @@ interface EditorState {
   originalMeta: ImageSourceMeta | null
   previewObjectUrl: string | null
   croppedPreviewUrl: string | null
-  cropApplyHistory: CropHistoryEntry[]
   isCropEditing: boolean
   cropDraft: CropRect | null
   appliedCrop: CropRect | null
@@ -99,7 +97,6 @@ export const useEditorStore = defineStore('editor', {
     originalMeta: null,
     previewObjectUrl: null,
     croppedPreviewUrl: null,
-    cropApplyHistory: [],
     isCropEditing: false,
     cropDraft: null,
     appliedCrop: null,
@@ -242,13 +239,7 @@ export const useEditorStore = defineStore('editor', {
         URL.revokeObjectURL(this.croppedPreviewUrl)
       }
 
-      for (const entry of this.cropApplyHistory) {
-        URL.revokeObjectURL(entry.croppedPreviewUrl)
-      }
-
-      this.cropApplyHistory = []
       this.croppedPreviewUrl = cropState.croppedPreviewUrl
-      this.cropApplyHistory = cropState.cropApplyHistory
       this.appliedCrop = cropState.appliedCrop
       this.cropDraft = cropState.cropDraft
     },
@@ -385,20 +376,11 @@ export const useEditorStore = defineStore('editor', {
       }
     },
 
-    clearCropHistory() {
-      for (const entry of this.cropApplyHistory) {
-        URL.revokeObjectURL(entry.croppedPreviewUrl)
-      }
-
-      this.cropApplyHistory = []
-    },
-
     clearCrop() {
       if (this.croppedPreviewUrl) {
         URL.revokeObjectURL(this.croppedPreviewUrl)
       }
 
-      this.clearCropHistory()
       this.croppedPreviewUrl = null
       this.isCropEditing = false
       this.cropDraft = null

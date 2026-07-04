@@ -27,7 +27,7 @@
 | **Проблема** | При single-crop модели массив всегда содержит 0 или 1 entry. Не stack undo — только обёртка вокруг одного URL для revoke. Название вводит в заблуждение. |
 | **Нарушает** | KISS, honest naming |
 | **Решение** | Удалить `cropApplyHistory` и `CropHistoryEntry`. Revoke старого preview URL — в одной функции при replace (`applyCropPreviewState`). |
-| **Статус** | [ ] |
+| **Статус** | [x] |
 
 ### 1.3. Fat store (~600 строк)
 
@@ -160,7 +160,7 @@ Layer 5 — Flags
 
 | | |
 |---|---|
-| **Сейчас** | `CropPreviewState` — 5 полей (`workingBlob`, `croppedPreviewUrl`, `cropApplyHistory`, `appliedCrop`, `cropDraft`) |
+| **Сейчас** | `CropPreviewState` — 3 поля (`croppedPreviewUrl`, `appliedCrop`, `cropDraft`) |
 | **Цель** | Возвращать только `{ croppedPreviewUrl }`; session fields задаёт store при enter/exit crop mode |
 | **Статус** | [ ] |
 
@@ -191,7 +191,7 @@ Layer 5 — Flags
 
 - [ ] Cancel crop работает в обоих сценариях (A, B)
 - [x] `workingBlob` удалён, тесты зелёные
-- [ ] `cropApplyHistory` удалён, тесты зелёные
+- [x] `cropApplyHistory` удалён, тесты зелёные
 - [ ] `npm test` pass
 - [ ] `docs/PROJECT.md` обновлён при изменении state contract (если нужно)
 - [ ] README trade-offs без изменений или с одной строкой про cancel (optional)
