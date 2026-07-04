@@ -15,10 +15,6 @@ export interface CropRect {
   height: number
 }
 
-export interface CropHistoryEntry {
-  croppedPreviewUrl: string
-}
-
 export interface Adjustments {
   brightness: number
   contrast: number

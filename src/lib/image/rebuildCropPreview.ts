@@ -1,11 +1,10 @@
 import { cropImageBlob } from '@/lib/image/cropImageBlob'
 import { cropOperationToRect, findCropOperation } from '@/lib/image/operations'
 import { preloadObjectUrl } from '@/lib/image/preloadObjectUrl'
-import type { CropHistoryEntry, CropRect, EditOperation } from '@/types/editor'
+import type { CropRect, EditOperation } from '@/types/editor'
 
 export interface CropPreviewState {
   croppedPreviewUrl: string | null
-  cropApplyHistory: CropHistoryEntry[]
   appliedCrop: CropRect | null
   cropDraft: CropRect | null
 }
@@ -17,7 +16,6 @@ export async function rebuildCropPreviewState(
   if (!cropOperation) {
     return {
       croppedPreviewUrl: null,
-      cropApplyHistory: [],
       appliedCrop: null,
       cropDraft: null,
     }
@@ -31,9 +29,6 @@ export async function rebuildCropPreviewState(
 
   return {
     croppedPreviewUrl,
-    cropApplyHistory: [{
-      croppedPreviewUrl,
-    }],
     appliedCrop: cropRect,
     cropDraft: cropRect,
   }

@@ -22,7 +22,6 @@ describe('syncCropPreviewFromOperations', () => {
     expect(state.croppedPreviewUrl).toBeNull()
     expect(state.appliedCrop).toBeNull()
     expect(state.cropDraft).toBeNull()
-    expect(state.cropApplyHistory).toEqual([])
   })
 
   it('rebuilds cropped preview from a crop operation', async () => {
@@ -34,6 +33,5 @@ describe('syncCropPreviewFromOperations', () => {
     expect(state.appliedCrop).toEqual({ x: 1, y: 2, width: 10, height: 8 })
     expect(state.cropDraft).toEqual({ x: 1, y: 2, width: 10, height: 8 })
     expect(state.croppedPreviewUrl).toMatch(/^blob:/)
-    expect(state.cropApplyHistory).toHaveLength(1)
   })
 })
