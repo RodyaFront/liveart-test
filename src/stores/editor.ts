@@ -1,7 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { createAsyncGuard } from '@/lib/async/createAsyncGuard'
-import { createCropSessionStart, hasPendingCrop as computeHasPendingCrop } from '@/lib/editor/cropSession'
+import { createCropSessionStart, cancelCropSession, hasPendingCrop as computeHasPendingCrop } from '@/lib/editor/cropSession'
 import {
   buildImageDimensionsLabel,
   buildImageDimensionsTooltip,
@@ -248,6 +248,16 @@ export const useEditorStore = defineStore('editor', {
       this.isViewingOriginal = false
       this.appliedCrop = session.appliedCrop
       this.cropDraft = session.cropDraft
+    },
+
+    cancelCropEditing() {
+      if (!this.isCropEditing || this.isApplyingCrop) {
+        return
+      }
+
+      const { cropDraft } = cancelCropSession(this.appliedCrop)
+      this.isCropEditing = false
+      this.cropDraft = cropDraft
     },
 
     async applyCrop() {

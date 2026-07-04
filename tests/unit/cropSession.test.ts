@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createCropSessionStart, hasPendingCrop } from '@/lib/editor/cropSession'
+import { createCropSessionStart, cancelCropSession, hasPendingCrop } from '@/lib/editor/cropSession'
 
 describe('cropSession', () => {
   it('starts a crop session from an existing crop operation', () => {
@@ -42,5 +42,15 @@ describe('cropSession', () => {
       { x: 0, y: 0, width: 10, height: 10 },
       false,
     )).toBe(false)
+  })
+
+  it('resets crop draft to the session baseline on cancel', () => {
+    expect(cancelCropSession(null)).toEqual({ cropDraft: null })
+
+    const appliedCrop = { x: 1, y: 2, width: 10, height: 8 }
+    const result = cancelCropSession(appliedCrop)
+
+    expect(result.cropDraft).toEqual(appliedCrop)
+    expect(result.cropDraft).not.toBe(appliedCrop)
   })
 })
