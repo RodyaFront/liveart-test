@@ -111,7 +111,7 @@ interface EditDocument {
 
 Оба пути читают один `operations[]`. Возможное расхождение CSS vs Canvas — задокументированный trade-off.
 
-**Crop (инварианта):** в `operations[]` — **одна** crop-операция; координаты **всегда** относительно `originalBlob`. Re-crop («Adjust crop») = replace crop op + `syncCropPreviewFromOperations`. **Undo crop** удаляет эту единственную crop-операцию (не multi-step history). `workingBlob` / `croppedPreviewUrl` — derived cache, не source of truth.
+**Crop (инварианта):** в `operations[]` — **одна** crop-операция; координаты **всегда** относительно `originalBlob`. Re-crop («Adjust crop») = replace crop op + `syncCropPreviewFromOperations`. **Undo crop** удаляет эту единственную crop-операцию (не multi-step history). `croppedPreviewUrl` — derived cache, не source of truth.
 
 Во время `isCropEditing` cropper показывает оригинал (`cropperImageUrl`); adjustments/filters по-прежнему применяются через CSS на stage (кроме «View original»).
 
@@ -201,7 +201,7 @@ tests/
 
 ### 2.10. Pinia store — реализованный контракт
 
-**State (ключевое):** `originalBlob`, `originalMeta`, `operations[]`, crop state (`isCropEditing`, `cropDraft`, `appliedCrop`, `workingBlob`, `croppedPreviewUrl`), `isViewingOriginal`, `isExportingImage`, `isImportingDocument`, `error`.
+**State (ключевое):** `originalBlob`, `originalMeta`, `operations[]`, crop state (`isCropEditing`, `cropDraft`, `appliedCrop`, `croppedPreviewUrl`), `isViewingOriginal`, `isExportingImage`, `isImportingDocument`, `error`.
 
 **Getters:** `hasImage`, `effectivePreviewUrl`, `cropperImageUrl`, `effectivePreviewCssFilter`, `imageDimensionsLabel`, `imageDimensionsTooltip`, `adjustValues`, `filterValue`, `canExport`, `canViewOriginal`, `editDocument`, …
 

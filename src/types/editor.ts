@@ -16,7 +16,6 @@ export interface CropRect {
 }
 
 export interface CropHistoryEntry {
-  workingBlob: Blob
   croppedPreviewUrl: string
 }
 

@@ -40,7 +40,6 @@ interface EditorState {
   originalBlob: Blob | null
   originalMeta: ImageSourceMeta | null
   previewObjectUrl: string | null
-  workingBlob: Blob | null
   croppedPreviewUrl: string | null
   cropApplyHistory: CropHistoryEntry[]
   isCropEditing: boolean
@@ -99,7 +98,6 @@ export const useEditorStore = defineStore('editor', {
     originalBlob: null,
     originalMeta: null,
     previewObjectUrl: null,
-    workingBlob: null,
     croppedPreviewUrl: null,
     cropApplyHistory: [],
     isCropEditing: false,
@@ -249,7 +247,6 @@ export const useEditorStore = defineStore('editor', {
       }
 
       this.cropApplyHistory = []
-      this.workingBlob = cropState.workingBlob
       this.croppedPreviewUrl = cropState.croppedPreviewUrl
       this.cropApplyHistory = cropState.cropApplyHistory
       this.appliedCrop = cropState.appliedCrop
@@ -285,7 +282,6 @@ export const useEditorStore = defineStore('editor', {
         this.isViewingOriginal = false
         this.originalBlob = file
         this.originalMeta = meta
-        this.workingBlob = file
         this.previewObjectUrl = URL.createObjectURL(file)
         this.isCropEditing = false
       }
@@ -403,7 +399,6 @@ export const useEditorStore = defineStore('editor', {
       }
 
       this.clearCropHistory()
-      this.workingBlob = null
       this.croppedPreviewUrl = null
       this.isCropEditing = false
       this.cropDraft = null
