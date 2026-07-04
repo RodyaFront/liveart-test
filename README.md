@@ -1,5 +1,26 @@
-# Vue 3 + TypeScript + Vite
+# Image Editor (LiveArt test)
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Browser image editor with a non-destructive operation model. Vue 3 + Vuetify 3 + Pinia + TypeScript + CropperJS.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Run
+
+```bash
+npm i && npm run dev   # http://localhost:5173
+npm test               # Vitest
+```
+
+## Key decisions
+
+- **Non-destructive editing:** immutable `originalBlob` + typed `operations[]` (`crop`, `adjust`, `filter`).
+- **Single crop op:** coordinates are always relative to the original; re-crop replaces the op, it does not stack.
+
+## Trade-offs
+
+- **Live preview** uses CSS `filter`; **export / replay** use Canvas (`crop → filter → blob`). Same filter strings, minor rendering differences — speed over pixel-perfect preview.
+
+## Bonus features
+
+- **Grayscale / Sepia** — `operations[]` with `type: 'filter'` and `name: 'grayscale' | 'sepia'`.
+- **Export JSON** — `buildEditDocument(meta, operations)` → `EditDocument` v1: `source` (name, width, height) + `operations[]`.
+- **Import JSON** — `parseEditDocument` → `validateEditDocument` → restore `operations[]` and crop preview. Requires the same original image already loaded (matching `width` / `height`; filename may differ).
+- **Replay** — `replayDocument(originalBlob, doc)` = `exportImageBlob(originalBlob, doc.operations)` — same pipeline as Export image.
