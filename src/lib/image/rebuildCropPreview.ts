@@ -4,7 +4,6 @@ import { preloadObjectUrl } from '@/lib/image/preloadObjectUrl'
 import type { CropHistoryEntry, CropRect, EditOperation } from '@/types/editor'
 
 export interface CropPreviewState {
-  workingBlob: Blob
   croppedPreviewUrl: string | null
   cropApplyHistory: CropHistoryEntry[]
   appliedCrop: CropRect | null
@@ -17,7 +16,6 @@ export async function rebuildCropPreviewState(
 ): Promise<CropPreviewState> {
   if (!cropOperation) {
     return {
-      workingBlob: originalBlob,
       croppedPreviewUrl: null,
       cropApplyHistory: [],
       appliedCrop: null,
@@ -32,10 +30,8 @@ export async function rebuildCropPreviewState(
   await preloadObjectUrl(croppedPreviewUrl)
 
   return {
-    workingBlob: croppedBlob,
     croppedPreviewUrl,
     cropApplyHistory: [{
-      workingBlob: croppedBlob,
       croppedPreviewUrl,
     }],
     appliedCrop: cropRect,

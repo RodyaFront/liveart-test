@@ -19,7 +19,6 @@ describe('syncCropPreviewFromOperations', () => {
       { type: 'adjust', brightness: 0, contrast: 0, saturation: 0 },
     ])
 
-    expect(state.workingBlob).toBe(originalBlob)
     expect(state.croppedPreviewUrl).toBeNull()
     expect(state.appliedCrop).toBeNull()
     expect(state.cropDraft).toBeNull()
