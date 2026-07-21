@@ -10,6 +10,7 @@ import {
 import { downloadBlob } from '@/lib/image/downloadFile'
 import { exportImageBlob, getExportImageFilename } from '@/lib/image/exportImage'
 import { syncCropPreviewFromOperations } from '@/lib/image/rebuildCropPreview'
+import { applyWatermark } from '@/lib/image/watermark'
 import type { AsyncGuard } from '@/lib/async/createAsyncGuard'
 import type { EditorCore } from './state'
 import type { CropFlow } from './useCropFlow'
@@ -44,7 +45,8 @@ export function useExportImport(
     isExportingImage.value = true
 
     try {
-      const blob = await exportImageBlob(originalBlob.value, operations.value)
+      const edited = await exportImageBlob(originalBlob.value, operations.value)
+      const blob = await applyWatermark(edited)
 
       if (!exportGuard.isCurrent(seq)) {
         return
